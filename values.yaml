@@ -1,0 +1,68 @@
+---
+
+executor: KubernetesExecutor
+redis:
+  enabled: false
+rbac:
+  create: true
+serviceaccount:
+  create: true
+
+postgresql:
+  enabled: false
+externalDatabase:
+  host: postgresql-headless.database.svc.cluster.local
+  user: su_airflow
+  database: airflow
+  port: 5432
+extraEnvVars:
+  - name: "AIRFLOW__API__AUTH_BACKEND"
+    value: "airflow.api.auth.backend.basic_auth"
+  - name: "AIRFLOW__WEBSERVER__EXPOSE_CONFIG"
+    value: "True"
+  - name: "AIRFLOW__CORE__LOAD_EXAMPLES"
+    value: "False"
+  - name: "GNICORN_CMD_ARGS"
+    value: "--log-level WARNING"
+  - name: "PYTHONPATH"
+    value: "opt/bitnami/airflow/dags/git_workflow"
+  - name: "AIRFLOW__LOGGING__REMOTE_LOGGING"
+    value: "True"
+  - name: "AIRFLOW__LOGGING__ENCRYPT_S3_LOGS"
+    value: "False"
+  - name: "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER"
+    value: "s3://airflow/logs"
+  - name: "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID"
+    value: "local_minio"
+
+web:
+  replicaCount: 1
+  extraVolumeMounts:
+    - name: airflow-python-requirements
+      mountPath: /bitnami/python/
+  extraVolumes:
+    - name: airflow-python-requirements
+      configMap:
+        name: airflow-python-requirements
+
+scheduler:
+  replicaCount: 1
+  extraVolumeMounts:
+    - name: airflow-python-requirements
+      mountPath: /bitnami/python/
+  extraVolumes:
+    - name: airflow-python-requirements
+      configMap:
+        name: airflow-python-requirements
+
+worker:
+  extraVolumeMounts:
+    - name: airflow-python-requirements
+      mountPath: /bitnami/python/
+  extraVolumes:
+    - name: airflow-python-requirements
+      configMap:
+        name: airflow-python-requirements
+
+metrics:
+  enabled: true

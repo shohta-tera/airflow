@@ -1,0 +1,4 @@
+---
+resources:
+  requests:
+    memory: 512Mi
